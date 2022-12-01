@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import Button from '@mui/material/Button';
 import {useContext} from 'react';
 import './Cell.css'
@@ -7,8 +7,9 @@ import {TurnContext} from "../context/TurnContext.js";
 const Cell = (props) => {
     const {item, socket} = useContext(TurnContext)
     let handlerClick = () => {
-        if (props.nextTurn && props.nextTurn !== item) return
+        if ((props.nextTurn && props.nextTurn !== item) || props.gameStatus.startsWith('Waiting')) return
         socket.emit('turn', props.id, item)
+        console.log(item)
     }
     return (
         <Button

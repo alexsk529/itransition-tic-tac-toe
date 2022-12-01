@@ -24,22 +24,33 @@ const clients = []
 
 
 io.on("connection", (socket) => {
-    io.socketsJoin('room1')
     console.log('Clients amount: ', io.engine.clientsCount)
     console.log(`User connected: ${socket.id}`)
     clients.push(socket.id)
-    clients.forEach((item,index) => {
-        index === 0 ? io.to(item).emit('item', 'X') : io.to(item).emit('item', 'O');
+    clients.forEach((id,index) => {
+        index === 0 ?
+            io.to(id).emit('item', 'X') :
+            io.to(id).emit('item', 'O');
     })
+
+    if (clients.length > 1) io.emit('start-game', 'turn')
+
     socket.on('turn', (field, item) => {
         const nextTurn = item === 'X' ? 'O' : 'X'
-        gameController.turn(field, item);
+        gameController.makeTurn(field, item);
         io.emit('refresh-board', gameController.getField(), nextTurn)
+        const winner = gameController.getWinner(gameController.getField());
+        if (winner) io.emit('result', winner)
     })
+
+
+
     socket.on('disconnecting', (r) => {
         gameController.clear()
         clients.splice(clients.indexOf(socket.id), 1)
         io.emit('refresh-board', gameController.getField())
+        console.log('Clients amount: ', io.engine.clientsCount)
+
     })
 
 })

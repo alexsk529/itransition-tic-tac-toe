@@ -11,12 +11,17 @@ console.log(socket)
 
 function App() {
     const {item, setItem} = useTurn();
-    socket.on('item', (item) => setItem(item));
-
+    const itemRef = React.useRef(item)
+    socket.on('connect', () => {
+        socket.on('item', (el) => {
+            setItem(el);
+            itemRef.current = el
+        });
+    })
     return (
         <React.StrictMode>
             <TurnContext.Provider
-                value={{item, setItem, socket}}
+                value={{item, socket, itemRef}}
             >
                 <div className="App">
                     <Game/>
