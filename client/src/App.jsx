@@ -7,7 +7,6 @@ import {useTurn} from './hooks/useTurn.js';
 import {TurnContext} from "./context/TurnContext.js";
 
 const socket = io("http://localhost:5000")
-console.log(socket)
 
 function App() {
     const {item, setItem} = useTurn();

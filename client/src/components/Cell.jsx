@@ -8,6 +8,7 @@ const Cell = (props) => {
     const {item, socket} = useContext(TurnContext)
     let handlerClick = () => {
         if (props.gameStatus.startsWith('Waiting')) return
+        if (props.gameStatus === 'You won' || props.gameStatus === 'You lost') return
         socket.emit('turn', props.id, item)
         console.log(item)
     }

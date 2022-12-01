@@ -9,32 +9,18 @@ const Game = () => {
     const {item, socket, itemRef} = useContext(TurnContext)
     const [gameStatus, setGameStatus] = useState('Waiting for the opponent')
 
+    useEffect(()=> {
+        socket.on('start-game', () => {
+            console.log('start')
+            itemRef.current === 'X' ?
+            setGameStatus('Your turn') :
+            setGameStatus('Waiting for the opponents\' turn');
+        })
+    }, [socket])
+
     socket.on('game-status', message => {
         setGameStatus(message)
     })
-
-
-    useEffect(()=> {
-        socket.once('start-game', (status)=> setGameStatus(status))
-    },[socket])
-    // useEffect(()=> {
-    //     if (gameStatus !== 'Waiting for the opponent' && gameStatus !== 'You won' && gameStatus !== 'You lost') {
-    //         !nextTurn && itemRef.current === 'X' ? setGameStatus('Your turn') : setGameStatus('Waiting for the opponents\' turn')
-    //         if (nextTurn && nextTurn === itemRef.current)  setGameStatus('Your turn')
-    //         else if (nextTurn) setGameStatus('Waiting for the opponents\' turn')
-    //     }
-    // },[gameStatus, nextTurn, itemRef])
-    useEffect(()=> {
-        socket.once('result', (winner) => {
-            winner === itemRef.current ?
-                setGameStatus('You won') :
-                setGameStatus('You lost')
-                // console.log('you won') :
-                // console.log('you lost')
-
-        })
-    },[socket, itemRef, gameStatus])
-
 
     return (
         <Box
