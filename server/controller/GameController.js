@@ -34,6 +34,10 @@ class GameController {
         }
         return null
     }
+    isDraw = (board) => {
+        if (!board.includes('') && !this.getWinner(board)) return true
+        return false
+    }
 }
 
 export default new GameController();

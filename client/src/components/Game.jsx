@@ -3,6 +3,7 @@ import Box from '@mui/material/Box'
 import './Game.css';
 import Board from "./Board";
 import {TurnContext} from "../context/TurnContext.js";
+import {PlayAgain} from "./PlayAgain.jsx";
 
 
 const Game = () => {
@@ -21,6 +22,7 @@ const Game = () => {
     socket.on('game-status', message => {
         setGameStatus(message)
     })
+    const messagesEvokeButton = ['You won!', 'You lost!', 'Draw!']
 
     return (
         <Box
@@ -50,6 +52,7 @@ const Game = () => {
             </Box>
             <Board gameStatus={gameStatus}/>
             <p className="game-text">{gameStatus}</p>
+            {messagesEvokeButton.includes(gameStatus) ? <PlayAgain/> : null}
         </Box>
     );
 };

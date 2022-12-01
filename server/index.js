@@ -49,9 +49,14 @@ io.on("connection", (socket) => {
         const winner = gameController.getWinner(gameController.getField());
         if (winner) {
             nextTurn = 'end';
-            const messageWin = ['You won', 'You lost']
+            const messageWin = ['You won!', 'You lost!']
             if (winner === 'X') sendMsg(clients, messageWin);
             else sendMsg([clients[1], clients[0]], messageWin)
+        }
+
+        if (gameController.isDraw(gameController.getField())) {
+            nextTurn = 'end';
+            io.emit('game-status', 'Draw!')
         }
         const messageTurn = ['Your turn', 'Waiting for the opponents\' turn']
         if (nextTurn!=='end' && nextTurn === 'X') sendMsg(clients, messageTurn);
