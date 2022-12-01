@@ -4,10 +4,10 @@ import Box from '@mui/material/Box'
 import Cell from "./Cell";
 import {TurnContext} from "../context/TurnContext";
 
-const Board = ({gameStatus, nextTurn}) => {
+const Board = ({gameStatus}) => {
     const [board, setBoard] = React.useState(Array(9).fill(null))
     const {socket} = useContext(TurnContext);
-    socket.on('refresh-board', (boardNew, turn) => {
+    socket.on('refresh-board', (boardNew) => {
         setBoard(boardNew);
     })
 
@@ -24,7 +24,7 @@ const Board = ({gameStatus, nextTurn}) => {
         >
             {
                 board.map ((cell, i) => {
-                    return (<Cell value={cell} key={i} id={i} nextTurn={nextTurn} gameStatus={gameStatus}/>)
+                    return (<Cell value={cell} key={i} id={i} gameStatus={gameStatus}/>)
                 })
             }
 

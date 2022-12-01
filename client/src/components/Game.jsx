@@ -8,9 +8,9 @@ import {TurnContext} from "../context/TurnContext.js";
 const Game = () => {
     const {item, socket, itemRef} = useContext(TurnContext)
     const [gameStatus, setGameStatus] = useState('Waiting for the opponent')
-    const [nextTurn, setNextTurn] = React.useState('')
-    socket.on('refresh-board', (boardNew, turn) => {
-        setNextTurn(turn);
+
+    socket.on('game-status', message => {
+        setGameStatus(message)
     })
 
 
@@ -62,7 +62,7 @@ const Game = () => {
                 <span>Player: alexsk529 ({item})</span>
                 <span>Your opponent: yyyy ({item === 'X' ? 'O' : 'X'})</span>
             </Box>
-            <Board gameStatus={gameStatus} nextTurn={nextTurn}/>
+            <Board gameStatus={gameStatus}/>
             <p className="game-text">{gameStatus}</p>
         </Box>
     );

@@ -33,14 +33,30 @@ io.on("connection", (socket) => {
             io.to(id).emit('item', 'O');
     })
 
-    if (clients.length > 1) io.emit('start-game', 'turn')
+    if (clients.length > 1) {
+        io.emit('start-game', 'turn')
+    }
 
     socket.on('turn', (field, item) => {
-        const nextTurn = item === 'X' ? 'O' : 'X'
+        let nextTurn = item === 'X' ? 'O' : 'X'
         gameController.makeTurn(field, item);
-        io.emit('refresh-board', gameController.getField(), nextTurn)
+        io.emit('refresh-board', gameController.getField())
+
+        const sendMsg = ([id1, id2], [message1, message2])=>{
+            io.to(id1).emit('game-status', message1)
+            io.to(id2).emit('game-status', message2)
+        }
+
         const winner = gameController.getWinner(gameController.getField());
-        if (winner) io.emit('result', winner)
+        if (winner) {
+            nextTurn = null;
+            const messageWin = ['You won', 'You lost']
+            if (winner === 'X') sendMsg(clients, messageWin);
+            else sendMsg([clients[1], clients[0]], messageWin)
+        }
+        const messageTurn = ['Your turn', 'Waiting for the opponents\' turn']
+        if (nextTurn && nextTurn === 'X') sendMsg(clients, messageTurn);
+        else if (nextTurn && nextTurn === 'O') sendMsg([clients[1], clients[0]], messageTurn)
     })
 
 

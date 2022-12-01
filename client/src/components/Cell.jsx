@@ -7,7 +7,7 @@ import {TurnContext} from "../context/TurnContext.js";
 const Cell = (props) => {
     const {item, socket} = useContext(TurnContext)
     let handlerClick = () => {
-        if ((props.nextTurn && props.nextTurn !== item) || props.gameStatus.startsWith('Waiting')) return
+        if (props.gameStatus.startsWith('Waiting')) return
         socket.emit('turn', props.id, item)
         console.log(item)
     }
