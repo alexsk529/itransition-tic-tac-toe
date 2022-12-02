@@ -8,7 +8,6 @@ import {useAuth} from "./hooks/useAuth.js";
 import {Context} from "./context/Context.js";
 import Box from "@mui/material/Box";
 
-// const socket = io("http://localhost:5000")
 
 function App() {
     const {enter, exit, name, setName, isLogin} = useAuth()

@@ -22,50 +22,70 @@ const io = new Server(http, {
 
 const clients = []
 
+let clientsNo = 0;
 
-io.on("connection", (socket) => {
+
+io.on("connection", async (socket) => {
+    clientsNo++
+    let roomNo = Math.round(clientsNo/2)
+    socket.join(roomNo)
+    socket.emit('serverMsg', roomNo)
     console.log('Clients amount: ', io.engine.clientsCount)
     console.log(`User connected: ${socket.id}`)
-    if (clients.length < 2) clients.push(socket.id)
-    clients.forEach((id,index) => {
-        index === 0 ?
-            io.to(id).emit('item', 'X') :
-            io.to(id).emit('item', 'O');
-    })
+    const sockets = await io.in(roomNo).fetchSockets();
+    let items = ['O', 'X']
+    if (sockets.length > 1) {
+        for (const socket of sockets) {
+            io.to(socket.id).emit('item', items.pop())
+        }
+        io.to(roomNo).emit('start-game')
+    }
 
-    if (clients.length > 1) io.emit('start-game')
 
 
-    socket.on('turn', (field, item) => {
+
+    socket.on('turn', async (field, item) => {
         let nextTurn = item === 'X' ? 'O' : 'X'
         gameController.makeTurn(field, item);
-        io.emit('refresh-board', gameController.getField())
+        io.to(roomNo).emit('refresh-board', gameController.getField())
+        const sockets = await io.in(roomNo).fetchSockets();
 
-        const sendMsg = ([id1, id2], [message1, message2])=>{
-            io.to(id1).emit('game-status', message1)
-            io.to(id2).emit('game-status', message2)
+
+        const sendMsg = (id, msgs) => {
+            io.to(id).emit('game-status', msgs.pop());
+            console.log(msgs)
         }
 
         const winner = gameController.getWinner(gameController.getField());
         if (winner) {
             nextTurn = 'end';
-            const messageWin = ['You won!', 'You lost!']
-            if (winner === 'X') sendMsg(clients, messageWin);
-            else sendMsg([clients[1], clients[0]], messageWin)
+            if (winner === 'X') {
+                const messageWin = ['You lost!', 'You won!']
+                for (const socket of sockets) sendMsg(socket.id, messageWin)
+            } else {
+                const messageWin = ['You won!', 'You lost!'];
+                for (const socket of sockets) sendMsg(socket.id, messageWin)
+            }
         }
 
         if (gameController.isDraw(gameController.getField())) {
             nextTurn = 'end';
-            io.emit('game-status', 'Draw!')
+            io.to(roomNo).emit('game-status', 'Draw!')
         }
-        const messageTurn = ['Your turn', 'Waiting for the opponents\' turn']
-        if (nextTurn!=='end' && nextTurn === 'X') sendMsg(clients, messageTurn);
-        else if (nextTurn!=='end' && nextTurn === 'O') sendMsg([clients[1], clients[0]], messageTurn)
+        if (nextTurn!=='end' && nextTurn === 'X'){
+            const messageTurn = ['Waiting for the opponents\' turn', 'Your turn']
+            for (const socket of sockets) io.to(socket.id).emit('game-status', messageTurn.pop());
+        }
+        else if (nextTurn!=='end' && nextTurn === 'O') {
+            const messageTurn = ['Your turn', 'Waiting for the opponents\' turn']
+            for (const socket of sockets) io.to(socket.id).emit('game-status', messageTurn.pop());
+        }
     })
 
 
 
     socket.on('disconnecting', (r) => {
+        clientsNo--
         gameController.clear()
         clients.splice(clients.indexOf(socket.id), 1)
         io.emit('refresh-board', gameController.getField())

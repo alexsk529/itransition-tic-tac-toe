@@ -8,20 +8,26 @@ import {PlayAgain} from "./PlayAgain.jsx";
 
 import io from 'socket.io-client';
 
-//const socket = io("http://localhost:5000")
-
 
 const Game = () => {
-    const {item, setItem, /*socket,*/ itemRef, name, exit} = useContext(Context)
+    const {item, setItem, itemRef, name, exit} = useContext(Context)
     const [gameStatus, setGameStatus] = useState('Waiting for the opponent')
     const url = "http://localhost:5000"
     const socket = useMemo(()=> io(url), [url])
 
+    let roomNo;
+
     socket.on('connect', () => {
-        socket.on('item', (el) => {
-            setItem(el);
-            itemRef.current = el
-        });
+
+    })
+    socket.on('item', (el) => {
+        setItem(el);
+        itemRef.current = el
+    });
+
+    socket.once('serverMsg', (No)=>{
+        roomNo = No;
+        console.log('roomNo: ', roomNo)
     })
 
     useEffect(()=> {

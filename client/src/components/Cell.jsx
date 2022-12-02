@@ -10,7 +10,6 @@ const Cell = ({value, gameStatus, id, socket}) => {
         if (gameStatus.startsWith('Waiting')) return
         if (gameStatus === 'You won' || gameStatus === 'You lost') return
         socket.emit('turn', id, item)
-        console.log(item)
     }
     return (
         <Button

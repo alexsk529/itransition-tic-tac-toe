@@ -2,7 +2,6 @@ import React, {useContext} from 'react';
 import './Board.css';
 import Box from '@mui/material/Box'
 import Cell from "./Cell";
-import {Context} from "../context/Context";
 
 const Board = ({gameStatus, socket}) => {
     const [board, setBoard] = React.useState(Array(9).fill(null))
