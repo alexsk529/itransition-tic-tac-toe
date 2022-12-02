@@ -2,31 +2,40 @@ import './App.css';
 import io from 'socket.io-client';
 import React from 'react';
 import {useEffect, useState} from 'react';
-import Game from "./components/Game";
-import {useTurn} from './hooks/useTurn.js';
-import {TurnContext} from "./context/TurnContext.js";
+import Game from "./components/Game.jsx";
+import Auth from './components/Auth.jsx';
+import {useAuth} from "./hooks/useAuth.js";
+import {Context} from "./context/Context.js";
+import Box from "@mui/material/Box";
 
-const socket = io("http://localhost:5000")
+// const socket = io("http://localhost:5000")
 
 function App() {
-    const {item, setItem} = useTurn();
+    const {enter, exit, name, setName, isLogin} = useAuth()
+    const [item, setItem] = useState('');
     const itemRef = React.useRef(item)
-    socket.on('connect', () => {
-        socket.on('item', (el) => {
-            setItem(el);
-            itemRef.current = el
-        });
-    })
+
+
     return (
-        <React.StrictMode>
-            <TurnContext.Provider
-                value={{item, socket, itemRef}}
+            <Context.Provider
+                value={{item, setItem, enter, exit, name, setName,/* socket,*/ itemRef }}
             >
                 <div className="App">
-                    <Game/>
+                    <Box
+                        sx={{
+                            height: '100vh',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'space-evenly',
+                            backgroundColor: '#9fa8da'
+                        }}
+                    >
+                        <h1 className="game-text">Tic-Tac-Toe game</h1>
+                        {isLogin ? <Game/> : <Auth/>}
+                    </Box>
                 </div>
-            </TurnContext.Provider>
-        </React.StrictMode>
+            </Context.Provider>
 
     );
 }

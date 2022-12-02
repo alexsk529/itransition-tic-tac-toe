@@ -2,20 +2,20 @@ import React from 'react';
 import Button from '@mui/material/Button';
 import {useContext} from 'react';
 import './Cell.css'
-import {TurnContext} from "../context/TurnContext.js";
+import {Context} from "../context/Context.js";
 
-const Cell = (props) => {
-    const {item, socket} = useContext(TurnContext)
-    let handlerClick = () => {
-        if (props.gameStatus.startsWith('Waiting')) return
-        if (props.gameStatus === 'You won' || props.gameStatus === 'You lost') return
-        socket.emit('turn', props.id, item)
+const Cell = ({value, gameStatus, id, socket}) => {
+    const {item} = useContext(Context)
+    const handlerClick = () => {
+        if (gameStatus.startsWith('Waiting')) return
+        if (gameStatus === 'You won' || gameStatus === 'You lost') return
+        socket.emit('turn', id, item)
         console.log(item)
     }
     return (
         <Button
             onClick={handlerClick}
-            disabled={Boolean(props.value)}
+            disabled={Boolean(value)}
             sx={{
                 width: 100,
                 height: 100,
@@ -30,7 +30,7 @@ const Cell = (props) => {
                 color: '#263238',
             }}
         >
-            {props.value}
+            {value}
         </Button>
     );
 };

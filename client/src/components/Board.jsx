@@ -2,11 +2,10 @@ import React, {useContext} from 'react';
 import './Board.css';
 import Box from '@mui/material/Box'
 import Cell from "./Cell";
-import {TurnContext} from "../context/TurnContext";
+import {Context} from "../context/Context";
 
-const Board = ({gameStatus}) => {
+const Board = ({gameStatus, socket}) => {
     const [board, setBoard] = React.useState(Array(9).fill(null))
-    const {socket} = useContext(TurnContext);
     socket.on('refresh-board', (boardNew) => {
         setBoard(boardNew);
     })
@@ -24,7 +23,7 @@ const Board = ({gameStatus}) => {
         >
             {
                 board.map ((cell, i) => {
-                    return (<Cell value={cell} key={i} id={i} gameStatus={gameStatus}/>)
+                    return (<Cell value={cell} key={i} id={i} gameStatus={gameStatus} socket={socket}/>)
                 })
             }
 
@@ -32,4 +31,4 @@ const Board = ({gameStatus}) => {
     );
 };
 
-export default Board;
+export default React.memo(Board);

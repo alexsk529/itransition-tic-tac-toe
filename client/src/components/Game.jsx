@@ -1,18 +1,31 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useMemo, useState} from 'react';
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import './Game.css';
 import Board from "./Board";
-import {TurnContext} from "../context/TurnContext.js";
+import {Context} from "../context/Context.js";
 import {PlayAgain} from "./PlayAgain.jsx";
+
+import io from 'socket.io-client';
+
+//const socket = io("http://localhost:5000")
 
 
 const Game = () => {
-    const {item, socket, itemRef} = useContext(TurnContext)
+    const {item, setItem, /*socket,*/ itemRef, name, exit} = useContext(Context)
     const [gameStatus, setGameStatus] = useState('Waiting for the opponent')
+    const url = "http://localhost:5000"
+    const socket = useMemo(()=> io(url), [url])
+
+    socket.on('connect', () => {
+        socket.on('item', (el) => {
+            setItem(el);
+            itemRef.current = el
+        });
+    })
 
     useEffect(()=> {
         socket.on('start-game', () => {
-            console.log('start')
             itemRef.current === 'X' ?
             setGameStatus('Your turn') :
             setGameStatus('Waiting for the opponents\' turn');
@@ -25,36 +38,42 @@ const Game = () => {
     const messagesEvokeButton = ['You won!', 'You lost!', 'Draw!']
 
     return (
-        <Box
-            sx={{
-                height: '100vh',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'space-evenly',
-                backgroundColor: '#9fa8da'
-            }}
-        >
-            <h1 className="game-text">Tic-Tac-Toe game</h1>
+        <React.Fragment>
             <Box
                 m={0}
                 sx={{
-                width: 300,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                gap: 0.5,
-                fontSize: 14,
-                color: '#4527a0'
-            }}>
-                <span>Player: alexsk529 ({item})</span>
-                <span>Your opponent: yyyy ({item === 'X' ? 'O' : 'X'})</span>
+                    width: 300,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 0.5,
+                    fontSize: 14,
+                    color: '#4527a0'
+                }}>
+                <span>Player: {name} ({item})</span>
+                <span>Your opponent ({item === 'X' ? 'O' : 'X'})</span>
             </Box>
-            <Board gameStatus={gameStatus}/>
+            <Board gameStatus={gameStatus} socket={socket}/>
             <p className="game-text">{gameStatus}</p>
-            {messagesEvokeButton.includes(gameStatus) ? <PlayAgain/> : null}
-        </Box>
-    );
+            <Box
+                display='flex'
+                gap={0.5}
+            >
+                {
+                    messagesEvokeButton.includes(gameStatus) ? <PlayAgain/> : null
+                }
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={()=> {
+                        socket.disconnect()
+                        exit();
+                    }}
+                >Exit the Game</Button>
+            </Box>
+
+        </React.Fragment>
+    )
 };
 
 export default Game;

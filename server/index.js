@@ -26,7 +26,7 @@ const clients = []
 io.on("connection", (socket) => {
     console.log('Clients amount: ', io.engine.clientsCount)
     console.log(`User connected: ${socket.id}`)
-    clients.push(socket.id)
+    if (clients.length < 2) clients.push(socket.id)
     clients.forEach((id,index) => {
         index === 0 ?
             io.to(id).emit('item', 'X') :
@@ -69,6 +69,7 @@ io.on("connection", (socket) => {
         gameController.clear()
         clients.splice(clients.indexOf(socket.id), 1)
         io.emit('refresh-board', gameController.getField())
+        io.emit('game-status', 'Waiting for the opponent')
         console.log('Clients amount: ', io.engine.clientsCount)
 
     })
