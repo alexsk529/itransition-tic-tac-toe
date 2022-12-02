@@ -1,19 +1,23 @@
-import game from '../model/Game.js';
 
 class GameController {
-    makeTurn = (field, item) => {
-        game.board[field] = item
+    // board = [
+    //     '', '', '',
+    //     '', '', '',
+    //     '', '', ''
+    // ]
+    makeTurn = (board,field, item) => {
+        board[field] = item
     }
-    getField = () => {
-        return game.board;
-    }
-    clear = () => {
-        game.board = [
-            '', '', '',
-            '', '', '',
-            '', '', ''
-        ]
-    }
+    // getField = () => {
+    //     return this.board;
+    // }
+    // clear = (board) => {
+    //     board = [
+    //         '', '', '',
+    //         '', '', '',
+    //         '', '', ''
+    //     ]
+    // }
     getWinner = (board) => {
         const combs = [
             [0, 1, 2],

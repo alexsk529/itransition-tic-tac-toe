@@ -3,7 +3,7 @@ import {Server} from 'socket.io';
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import gameController from './controller/GameController.js'
+import GameController from "./controller/GameController.js";
 
 dotenv.config()
 
@@ -20,15 +20,23 @@ const io = new Server(http, {
     maxHttpBufferSize: 1e10,
 })
 
-const clients = []
 
 let clientsNo = 0;
+const fields = new Map()
 
 
 io.on("connection", async (socket) => {
     clientsNo++
+    let board;
+    if (clientsNo % 2 === 0) board = [
+        '', '', '',
+        '', '', '',
+        '', '', ''
+    ]
+
     let roomNo = Math.round(clientsNo/2)
-    socket.join(roomNo)
+    fields.set(roomNo, board)
+    socket.join(roomNo, board)
     socket.emit('serverMsg', roomNo)
     console.log('Clients amount: ', io.engine.clientsCount)
     console.log(`User connected: ${socket.id}`)
@@ -41,22 +49,19 @@ io.on("connection", async (socket) => {
         io.to(roomNo).emit('start-game')
     }
 
-
-
-
-    socket.on('turn', async (field, item) => {
+    socket.on('turn', async (field, item, room) => {
+        let board = fields.get(room)
         let nextTurn = item === 'X' ? 'O' : 'X'
-        gameController.makeTurn(field, item);
-        io.to(roomNo).emit('refresh-board', gameController.getField())
-        const sockets = await io.in(roomNo).fetchSockets();
+        GameController.makeTurn(board,field, item);
+        io.to(room).emit('refresh-board', board)
+        const sockets = await io.in(room).fetchSockets();
 
 
         const sendMsg = (id, msgs) => {
             io.to(id).emit('game-status', msgs.pop());
-            console.log(msgs)
         }
 
-        const winner = gameController.getWinner(gameController.getField());
+        const winner = GameController.getWinner(board);
         if (winner) {
             nextTurn = 'end';
             if (winner === 'X') {
@@ -68,9 +73,9 @@ io.on("connection", async (socket) => {
             }
         }
 
-        if (gameController.isDraw(gameController.getField())) {
+        if (GameController.isDraw(board)) {
             nextTurn = 'end';
-            io.to(roomNo).emit('game-status', 'Draw!')
+            io.to(room).emit('game-status', 'Draw!')
         }
         if (nextTurn!=='end' && nextTurn === 'X'){
             const messageTurn = ['Waiting for the opponents\' turn', 'Your turn']
@@ -82,14 +87,34 @@ io.on("connection", async (socket) => {
         }
     })
 
+    socket.on('play-again', ()=> {
+        console.log('tick')
+        const room = Array.from(socket.rooms)[1]
+        console.log(room)
+        let board = fields.get(room)
+        console.log(board)
+        board = [
+            '', '', '',
+            '', '', '',
+            '', '', ''
+        ]
+        fields.set(room, board)
+        io.to(room).emit('refresh-board', board)
+        io.to(room).emit('start-game')
+    })
+
 
 
     socket.on('disconnecting', (r) => {
         clientsNo--
-        gameController.clear()
-        clients.splice(clients.indexOf(socket.id), 1)
-        io.emit('refresh-board', gameController.getField())
-        io.emit('game-status', 'Waiting for the opponent')
+        const room = Array.from(socket.rooms)[1]
+        board = [
+            '', '', '',
+            '', '', '',
+            '', '', ''
+        ]
+        io.to(room).emit('refresh-board', board)
+        io.to(room).emit('game-status', 'Waiting for the opponent')
         console.log('Clients amount: ', io.engine.clientsCount)
 
     })

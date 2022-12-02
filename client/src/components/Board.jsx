@@ -3,9 +3,10 @@ import './Board.css';
 import Box from '@mui/material/Box'
 import Cell from "./Cell";
 
-const Board = ({gameStatus, socket}) => {
+const Board = ({gameStatus, socket, room}) => {
     const [board, setBoard] = React.useState(Array(9).fill(null))
     socket.on('refresh-board', (boardNew) => {
+        console.log('refresh')
         setBoard(boardNew);
     })
 
@@ -22,7 +23,7 @@ const Board = ({gameStatus, socket}) => {
         >
             {
                 board.map ((cell, i) => {
-                    return (<Cell value={cell} key={i} id={i} gameStatus={gameStatus} socket={socket}/>)
+                    return (<Cell value={cell} key={i} id={i} gameStatus={gameStatus} socket={socket} room={room}/>)
                 })
             }
 

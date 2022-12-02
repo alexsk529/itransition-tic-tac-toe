@@ -4,12 +4,13 @@ import {useContext} from 'react';
 import './Cell.css'
 import {Context} from "../context/Context.js";
 
-const Cell = ({value, gameStatus, id, socket}) => {
+const Cell = ({value, gameStatus, id, socket, room}) => {
+    console.log(room)
     const {item} = useContext(Context)
     const handlerClick = () => {
         if (gameStatus.startsWith('Waiting')) return
         if (gameStatus === 'You won' || gameStatus === 'You lost') return
-        socket.emit('turn', id, item)
+        socket.emit('turn', id, item, room)
     }
     return (
         <Button

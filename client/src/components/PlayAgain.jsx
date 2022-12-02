@@ -1,11 +1,11 @@
 import Button from "@mui/material/Button";
 
-export const PlayAgain = () => {
+export const PlayAgain = ({socket}) => {
     return (
         <Button
             variant="contained"
             color="warning"
-            onClick={()=> window.location.reload()}
+            onClick={()=> socket.emit('play-again')}
         >
             Play Again
         </Button>

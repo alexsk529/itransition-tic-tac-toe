@@ -12,10 +12,9 @@ import io from 'socket.io-client';
 const Game = () => {
     const {item, setItem, itemRef, name, exit} = useContext(Context)
     const [gameStatus, setGameStatus] = useState('Waiting for the opponent')
-    const url = "http://localhost:5000"
+    const url = "https://itransition-tic-tac-toe-production.up.railway.app/"
     const socket = useMemo(()=> io(url), [url])
-
-    let roomNo;
+    const [room, setRoom] = useState()
 
     socket.on('connect', () => {
 
@@ -26,8 +25,7 @@ const Game = () => {
     });
 
     socket.once('serverMsg', (No)=>{
-        roomNo = No;
-        console.log('roomNo: ', roomNo)
+        setRoom(No);
     })
 
     useEffect(()=> {
@@ -59,14 +57,14 @@ const Game = () => {
                 <span>Player: {name} ({item})</span>
                 <span>Your opponent ({item === 'X' ? 'O' : 'X'})</span>
             </Box>
-            <Board gameStatus={gameStatus} socket={socket}/>
+            <Board gameStatus={gameStatus} socket={socket} room={room}/>
             <p className="game-text">{gameStatus}</p>
             <Box
                 display='flex'
                 gap={0.5}
             >
                 {
-                    messagesEvokeButton.includes(gameStatus) ? <PlayAgain/> : null
+                    messagesEvokeButton.includes(gameStatus) ? <PlayAgain socket={socket}/> : null
                 }
                 <Button
                     variant="contained"
