@@ -37,14 +37,18 @@ io.on("connection", async (socket) => {
     let roomNo = Math.round(clientsNo/2)
     fields.set(roomNo, board)
     socket.join(roomNo, board)
-    socket.emit('serverMsg', roomNo)
+    socket.emit('server-msg', roomNo)
     console.log('Clients amount: ', io.engine.clientsCount)
     console.log(`User connected: ${socket.id}`)
     const sockets = await io.in(roomNo).fetchSockets();
+    socket.once('socket-name', (name) => {
+        socket.broadcast.to(roomNo).emit('socket-name-opponent', name)
+    })
     let items = ['O', 'X']
     if (sockets.length > 1) {
         for (const socket of sockets) {
             io.to(socket.id).emit('item', items.pop())
+            socket.to(roomNo).emit('room-full')
         }
         io.to(roomNo).emit('start-game')
     }
@@ -114,6 +118,7 @@ io.on("connection", async (socket) => {
             '', '', ''
         ]
         io.to(room).emit('refresh-board', board)
+        io.to(room).emit('room-incomplete')
         io.to(room).emit('game-status', 'Waiting for the opponent')
         console.log('Clients amount: ', io.engine.clientsCount)
 

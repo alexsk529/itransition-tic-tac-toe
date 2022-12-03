@@ -6,7 +6,6 @@ import Cell from "./Cell";
 const Board = ({gameStatus, socket, room}) => {
     const [board, setBoard] = React.useState(Array(9).fill(null))
     socket.on('refresh-board', (boardNew) => {
-        console.log('refresh')
         setBoard(boardNew);
     })
 

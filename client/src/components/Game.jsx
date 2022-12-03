@@ -13,8 +13,11 @@ const Game = () => {
     const {item, setItem, itemRef, name, exit} = useContext(Context)
     const [gameStatus, setGameStatus] = useState('Waiting for the opponent')
     const url = "https://itransition-tic-tac-toe-production.up.railway.app/"
+    //const url = 'http://localhost:5000'
     const socket = useMemo(()=> io(url), [url])
     const [room, setRoom] = useState()
+    const [opponentName, setOpponentName] = useState('')
+    const [isRoomFull, setIsRoomFull] = useState(false)
 
     socket.on('connect', () => {
 
@@ -24,9 +27,24 @@ const Game = () => {
         itemRef.current = el
     });
 
-    socket.once('serverMsg', (No)=>{
+    socket.once('server-msg', (No)=>{
         setRoom(No);
     })
+
+    socket.on('room-full', () => {
+        setIsRoomFull(true)
+    })
+
+    name && isRoomFull && socket.emit('socket-name', name);
+    socket.on('socket-name-opponent', name => {
+        setOpponentName(name);
+    });
+
+    socket.on('room-incomplete', () => {
+        setIsRoomFull(false);
+        setOpponentName('')
+    })
+
 
     useEffect(()=> {
         socket.on('start-game', () => {
@@ -34,7 +52,7 @@ const Game = () => {
             setGameStatus('Your turn') :
             setGameStatus('Waiting for the opponents\' turn');
         })
-    }, [socket])
+    }, [socket, itemRef])
 
     socket.on('game-status', message => {
         setGameStatus(message)
@@ -55,7 +73,7 @@ const Game = () => {
                     color: '#4527a0'
                 }}>
                 <span>Player: {name} ({item})</span>
-                <span>Your opponent ({item === 'X' ? 'O' : 'X'})</span>
+                <span>Your opponent: {opponentName ? opponentName : 'waiting...'} ({item === 'X' ? 'O' : 'X'})</span>
             </Box>
             <Board gameStatus={gameStatus} socket={socket} room={room}/>
             <p className="game-text">{gameStatus}</p>

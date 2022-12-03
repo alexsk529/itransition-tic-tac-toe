@@ -5,7 +5,6 @@ import './Cell.css'
 import {Context} from "../context/Context.js";
 
 const Cell = ({value, gameStatus, id, socket, room}) => {
-    console.log(room)
     const {item} = useContext(Context)
     const handlerClick = () => {
         if (gameStatus.startsWith('Waiting')) return
