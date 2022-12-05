@@ -5,15 +5,19 @@ import './Game.css';
 import Board from "./Board";
 import {Context} from "../context/Context.js";
 import {PlayAgain} from "./PlayAgain.jsx";
+// import dotenv from 'dotenv';
+// import REACT_API_URL from '../.env'
+
+// dotenv.config()
 
 import io from 'socket.io-client';
 
+const REACT_APP_URL = process.env.REACT_API_URL || 'http://localhost:5000'
 
 const Game = () => {
     const {item, setItem, itemRef, name, exit} = useContext(Context)
     const [gameStatus, setGameStatus] = useState('Waiting for the opponent')
-    const url = "https://itransition-tic-tac-toe-production.up.railway.app/"
-    //const url = 'http://localhost:5000'
+    const url = REACT_APP_URL
     const socket = useMemo(()=> io(url), [url])
     const [room, setRoom] = useState()
     const [opponentName, setOpponentName] = useState('')
